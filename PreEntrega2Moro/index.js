@@ -12,78 +12,23 @@
 */
 
 // declaracion de variables 
-let stock = "1. Milanesa  x 2000$ \n 2. Ravioles x 1700$ \n 3. Pollo x 1500$ \n 4. Guiso x 1300$ \n 0. para terminar "
+
+let carrito = []; //Declaramos el array para el carrito
+let montoTotal = 0; //Declaramos el monto total de la compra
+let items = [ //Declaramos la lista de items en array con formato Nombre y precio
+	{ nombre: "Milanesa x1", precio: 2000 },
+	{ nombre: "Ravioles x1", precio: 1700 },
+	{ nombre: "Pollo x1", precio: 1500 },
+	{ nombre: "Guiso x1", precio: 1300 }
+  ];
+
+let stock = items.map(function(producto, index) {
+return `${index + 1}. ${producto.nombre} - ${producto.precio}$`;
+}).join('\n'); //Armamos el string con el formato de la lista de items para mostrarselo al cliente
+
 let user = prompt("Ingrese su nombre").toLowerCase()
 alert("Bienvenido "+ user)
-let eleccionUser = parseInt(prompt( `${user} estas son nuestras comidas, porfavor elige una opcion: \n ${stock} `))
-let itemElegido = ""
-let precioItem = 0
-
-// funcion para agregar el producto al carrito
-function addCarrito(comida,precio){
-    alert("agregamos tu comida al carrito")
-    itemElegido += `${comida} \n`
-    precioItem += precio
-}
-
-// funcion para mostrar lo pedido
-function pedido(){
-    if (precioItem === 0){
-        alert(`${user} no has agregado nada a tu carrito, lamentamos que no le haya convencido nuestro catalogo`)
-
-    }else{
-        alert(`${user} la compra de ${itemElegido} seria de ${precioItem} pesos`)
-
-        let numero = parseInt(prompt("si eres empleado de la empresa marca 1 y si no eres empleado marca 2"))
-        while (numero != 1 && numero != 2){
-            numero = parseInt(prompt("has ingresado un numero invalido, ingrese 1 si eres empleado o 2 si no lo eres"))
-        }
-
-        let porcentaje = (precioItem * 0.15)
-        let descuento = (precioItem - porcentaje)
-
-        if (numero === 1){
-            alert(`${user} como eres empleado de la empresa tienes un codigo de descuento del 15% entonces la comida saldria ${descuento}`)
-        
-        }else{
-            alert(`${user} como no eres empleado de la empresa la comida saldria ${precioItem}`)
-        }
-    }   
-
-}
-
-// funcion para acordar metodo de pago
-function compra(){
-    if (precioItem != 0 ){
-        const metodo = parseInt(prompt("1. abonar con efectivo al repartidor \n 2. tajerta debito/credito \n 3.mercado pago"))
-
-        while (metodo != 1 && metodo != 2 && metodo != 3){
-            metodo = parseInt(prompt("1. abonar con efectivo al repartidor \n 2. tajerta debito/credito \n 3.mercado pago"))
-        }
-        switch(metodo){
-            case 1:
-                alert("el repartidor llevara el ticket asi lo abonas en efectivo")
-                break
-
-            case 2:
-                prompt("ingrese el numero de su tarjeta")
-                prompt("ingrese la fecha de vencimiento")
-                prompt("ingrese el codigo de seguridad de tres digitos")
-                break
-            
-            case 3:
-                alert("nuestro Alias: el.barsito.mp \n nuestro CBU: 00000513548496")
-                break
-            
-            default:
-                alert("ingrese un numero correcto")
-                break
-        }
-        alert(`${user} gracias por realizar el pedido, espero que lo disfrute`)
-    } 
-}
-
-
+let eleccionUser = parseInt(prompt(`${user} estas son nuestras comidas, por favor elige una opción: \n${stock} \nSi usted desea ver el carrito precione 9, si desea finalizar su compra precione 0`));
 
 while(eleccionUser !=0){
     switch(eleccionUser) {
@@ -102,12 +47,106 @@ while(eleccionUser !=0){
         case 4:
             addCarrito("Guiso x1", 1300)
             break
+
+		case 9:
+			let itemsSeleccionados = verCarrito();
+			if (itemsSeleccionados.length === 0){
+				alert("No tienes nada en tu carrito")
+			}
+			else{
+				alert(`${user} su carrito actual es: \n${itemsSeleccionados} \nCon un subtotal de ${obtenerMontoTotal()}$ pesos`)
+			}
+			break
         
         default:
             alert("no tenemos el producto elegido")
     } 
-    eleccionUser = parseInt(prompt( `${user}  estas son nuestras comidas, porfavor elige una opcion: \n ${stock} `))
+    eleccionUser = parseInt(prompt(`${user} estas son nuestras comidas, porfavor elige una opcion: \n${stock} \nSi usted desea ver el carrito precione 9, si desea finalizar su compra precione 0`))
 }
 
 pedido()
 compra()
+
+
+
+
+
+// funcion para agregar el producto al carrito
+function addCarrito(comida,precio){
+    alert("agregamos tu comida al carrito")
+    carrito.push({ nombre: comida, precio: precio }); //Sabemos que en la posición 0 es nombre y la posición 1 es precio
+}
+
+// funcion para agregar el producto al carrito
+function obtenerMontoTotal() {
+	let precioTotal = carrito.reduce(function(acumulador, elementoActual) {
+	  return acumulador + elementoActual.precio; // Accede a la propiedad 'precio'
+	}, 0);
+	return precioTotal;
+}
+
+// funcion para vr el carrito
+function verCarrito() {
+	let itemsSeleccionados = carrito.map(function(producto, index) {
+		return `${index + 1}. ${producto.nombre} - ${producto.precio}$`;
+		}).join('\n'); //Armamos el string con el formato de la lista de items para mostrarselo al cliente
+	return itemsSeleccionados;
+}
+
+// funcion para mostrar lo pedido
+function pedido(){
+    if (carrito.length === 0){
+        alert(`${user} no has agregado nada a tu carrito, lamentamos que no le haya convencido nuestro catalogo`)
+    }else{
+		
+		let itemsSeleccionados = verCarrito();
+		montoTotal = obtenerMontoTotal();
+
+        alert(`${user} le mostramos su pedido: \n${itemsSeleccionados}\nEsta compra tendría un monto de ${montoTotal}$ pesos`)
+
+        let numero = parseInt(prompt("Si sos empleado de la empresa marca 1 y si no lo sos, marca 2"))
+        while (numero != 1 && numero != 2){
+            numero = parseInt(prompt("Ingresaste un numero inválido, por favor ingrese 1 si eres empleado o 2 si no lo eres"))
+        }
+
+        if (numero === 1){
+			let porcentaje = (montoTotal * 0.15)
+			let descuento = (montoTotal - porcentaje)
+            alert(`${user} como sos empleado de la empresa tenés un codigo de descuento del 15%!! Por ende, la comida te saldría ${descuento}`)     
+        }else{
+            alert(`${user} como no sos empleado de la empresa la comida tendrá un costo total de: ${montoTotal}$ pesos`)
+        }
+    }   
+
+}
+
+// funcion para acordar metodo de pago
+function compra(){
+    if (montoTotal != 0 ){
+        const metodo = parseInt(prompt("Cómo desea abonar? Seleccione una de las siguientes opciones \n 1. Abonar con efectivo al repartidor \n 2. Tajerta debito/credito \n 3. Mercado pago"))
+
+        while (metodo != 1 && metodo != 2 && metodo != 3){
+            metodo = parseInt(prompt("Cómo desea abonar? Seleccione una de las siguientes opciones \n 1. Abonar con efectivo al repartidor \n 2. Tajerta debito/credito \n 3. Mercado pago"))
+        }
+        switch(metodo){
+            case 1:
+                alert("El repartidor llevara el ticket asi lo abonas en efectivo")
+                break
+
+            case 2:
+                prompt("Ingrese el numero de su tarjeta")
+                prompt("Ingrese la fecha de vencimiento")
+                prompt("Ingrese el codigo de seguridad de tres digitos")
+                break
+            
+            case 3:
+                alert("Nuestro Alias: el.barsito.mp \n nuestro CBU: 00000513548496")
+                break
+            
+            default:
+                alert("Ingrese un numero correcto")
+                break
+        }
+        alert(`${user} gracias por realizar el pedido, espero que lo disfrute!`)
+    } 
+}
